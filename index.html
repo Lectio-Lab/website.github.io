@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lectio Lab - ILIAS Portal MCP</title>
+<meta name="description" content="An MCP server for professors and instructors at Tübingen University who work with ILIAS. Download the kit, or see the source.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --fg: #000000;
+    --fg-soft: #444444;
+    --fg-faint: #666666;
+    --border: #000000;
+    --border-soft: #666666;
+    --accent: #A61D3B;
+    --accent-fg: #ffffff;
+    --accent-text: #A61D3B;
+    --code-bg: #000000;
+    --code-fg: #ffffff;
+  }
+  :root[data-theme="dark"] {
+    --bg: #000000;
+    --bg-soft: #111111;
+    --fg: #ffffff;
+    --fg-soft: #cccccc;
+    --fg-faint: #999999;
+    --border: #ffffff;
+    --border-soft: #555555;
+    --accent: #A61D3B;
+    --accent-fg: #ffffff;
+    --accent-text: #ff6b85;
+    --code-bg: #1a1a1a;
+    --code-fg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #000000;
+      --bg-soft: #111111;
+      --fg: #ffffff;
+      --fg-soft: #cccccc;
+      --fg-faint: #999999;
+      --border: #ffffff;
+      --border-soft: #555555;
+      --accent: #A61D3B;
+      --accent-fg: #ffffff;
+      --accent-text: #ff6b85;
+      --code-bg: #1a1a1a;
+      --code-fg: #ffffff;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wordmark {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .wordmark .dot { color: var(--accent); }
+
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .theme-toggle:hover { background: var(--bg-soft); }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px 32px;
+    text-align: center;
+    gap: 34px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    padding: 4px 10px;
+    border: 1px solid var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 46px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 18px 0 0;
+    line-height: 1.15;
+  }
+
+  .subtitle {
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--fg-soft);
+    max-width: 620px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 4px;
+  }
+
+  .btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    padding: 14px 24px;
+    border: 2px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-fg);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--fg);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg-soft); }
+
+  .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  .meta-line {
+    font-size: 12px;
+    color: var(--fg-faint);
+    margin-top: -18px;
+  }
+  .meta-line a { color: var(--fg-faint); text-decoration: underline; }
+
+  .chatgpt-note {
+    font-size: 11px;
+    color: var(--fg-faint);
+    max-width: 420px;
+    line-height: 1.4;
+    margin-top: -22px;
+  }
+
+  .steps {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 18px;
+    max-width: 900px;
+    margin-top: 6px;
+  }
+  .step {
+    border: 1px solid var(--border-soft);
+    padding: 14px 18px;
+    text-align: left;
+    width: 220px;
+  }
+  .step .num {
+    color: var(--accent-text);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .step .label {
+    font-weight: 700;
+    font-size: 13.5px;
+    margin-top: 4px;
+  }
+  .step .desc {
+    font-size: 12px;
+    color: var(--fg-soft);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--fg-faint);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--fg-faint); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 560px) {
+    .topbar { padding: 16px 18px; }
+    main { padding: 32px 18px 24px; gap: 26px; }
+    footer { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span class="wordmark">Lectio Lab<span class="dot">.</span></span>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Dark Mode</button>
+  </div>
+
+  <main>
+    <div>
+      <span class="tag">MCP Server for ILIAS</span>
+      <h1>Lectio Lab - Academic OS</h1>
+    </div>
+
+    <p class="subtitle">An MCP server for professors and instructors at Tübingen University who work with ILIAS. Talk to your AI agent instead of clicking through ILIAS's web forms.</p>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" id="downloadBtn" href="downloads/ilias-portal-agent-kit-1.3.0-macos.zip" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download the Kit (macOS)
+      </a>
+      <a class="btn btn-secondary" id="chatgptBtn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.28 9.82a5.99 5.99 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.51-2.9A6 6 0 0 0 4.98 4.18a5.99 5.99 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.09 5.99 5.99 0 0 0 .51 4.91 6.05 6.05 0 0 0 6.52 2.9A5.99 5.99 0 0 0 13.26 24a6.06 6.06 0 0 0 5.77-4.21 5.99 5.99 0 0 0 4-2.9 6.06 6.06 0 0 0-.75-7.07zM13.26 22.5a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.79.79 0 0 0 .39-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.05v5.59a4.5 4.5 0 0 1-4.49 4.49zM3.6 18.3a4.47 4.47 0 0 1-.54-3.01l.14.08 4.78 2.76a.78.78 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.06l-4.83 2.79a4.5 4.5 0 0 1-6.14-1.64zM2.4 7.96A4.48 4.48 0 0 1 4.75 6l-.01.17v5.51a.78.78 0 0 0 .39.68l5.84 3.37-2.02 1.17a.08.08 0 0 1-.07 0L4.07 14.1A4.5 4.5 0 0 1 2.4 7.96zm16.6 3.86-5.84-3.37 2.02-1.17a.08.08 0 0 1 .07 0l4.81 2.78a4.5 4.5 0 0 1-.68 8.11v-5.68a.79.79 0 0 0-.38-.67zM20.21 9l-.14-.09-4.78-2.77a.78.78 0 0 0-.78 0l-5.84 3.38V7.19a.08.08 0 0 1 .03-.06l4.83-2.78a4.5 4.5 0 0 1 6.68 4.66zM8.55 12.87 6.53 11.7a.07.07 0 0 1-.04-.05V6.06a4.5 4.5 0 0 1 7.38-3.46l-.14.08-4.78 2.76a.79.79 0 0 0-.39.68zm1.1-2.37 2.6-1.5 2.6 1.5v3l-2.6 1.5-2.6-1.5z"/></svg>
+        Continue in ChatGPT
+      </a>
+    </div>
+    <p class="meta-line">v1.3.0 &middot; macOS &middot; ~125&nbsp;KB &middot; installs locally, nothing to deploy</p>
+    <p class="chatgpt-note">Opens ChatGPT with a setup prompt and the download link pre-filled. Browsers can't attach the file directly, so you'll still download it yourself.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <div class="label">Unzip &amp; install</div>
+        <div class="desc">Run <code>./install.sh</code> then <code>./start.sh</code>. No Docker, no database.</div>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <div class="label">Connect your agent</div>
+        <div class="desc">Register the MCP server with Cursor, Claude, or Codex using the generated config.</div>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <div class="label">Just ask</div>
+        <div class="desc">"Publish my slides to ILIAS." One login for MFA, then it's all natural language.</div>
+      </div>
+    </div>
+
+    <a class="btn btn-secondary" href="https://github.com/Lectio-Lab/ilias_portal" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.955-.266 1.98-.399 3-.405 1.02.006 2.045.14 3.005.405 2.29-1.552 3.295-1.23 3.295-1.23.645 1.653.24 2.873.105 3.176.77.84 1.235 1.91 1.235 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.135.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      View Source on GitHub
+    </a>
+  </main>
+
+  <footer>
+    <span>Practical Machine Learning &middot; University of Tübingen</span>
+    <span><a href="https://github.com/Lectio-Lab">github.com/Lectio-Lab</a></span>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var btn = document.getElementById('themeToggle');
+
+      function systemPrefersDark() {
+        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      function currentIsDark() {
+        var explicit = root.getAttribute('data-theme');
+        if (explicit === 'dark') return true;
+        if (explicit === 'light') return false;
+        return systemPrefersDark();
+      }
+      function syncLabel() {
+        btn.textContent = currentIsDark() ? 'Light Mode' : 'Dark Mode';
+      }
+      try {
+        var saved = localStorage.getItem('lectio-theme');
+        if (saved === 'dark' || saved === 'light') root.setAttribute('data-theme', saved);
+      } catch (e) {}
+      syncLabel();
+
+      btn.addEventListener('click', function () {
+        var next = currentIsDark() ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('lectio-theme', next); } catch (e) {}
+        syncLabel();
+      });
+    })();
+
+    (function () {
+      var prompt = "I want to set up the Lectio Lab ILIAS Portal MCP server so I can manage my ILIAS course from this chat. Please help me install it from this release: https://lectio-lab.github.io/website.github.io/downloads/ilias-portal-agent-kit-1.3.0-macos.zip (source: https://github.com/Lectio-Lab/ilias_portal). Walk me through downloading it, running install.sh and start.sh, and registering the MCP server with an agent.";
+      var link = document.getElementById('chatgptBtn');
+      link.href = "https://chatgpt.com/?q=" + encodeURIComponent(prompt);
+    })();
+  </script>
+</body>
+</html>
